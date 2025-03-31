@@ -143,7 +143,7 @@ def apply_kl_penalty(data: DataProto, kl_ctrl: core_algos.KLController, kl_penal
 
     token_level_rewards = token_level_scores - beta * kld
 
-    current_kl = VF.masked_mean(kld, mask=response_mask, axis=-1)  # average over sequence
+    current_kl = VF.masked_mean(kld, mask=response_mask, dim=-1)  # average over sequence
     current_kl = torch.mean(current_kl, dim=0).item()
 
     # According to https://github.com/huggingface/trl/blob/v0.11.0/trl/trainer/ppo_trainer.py#L880
@@ -634,7 +634,7 @@ class RayPPOTrainer:
 
                     with _timer("adv", timing_raw):
                         # apply kl penalty if available
-                        if not self.config.algorithm.use_kl_loss:  # apply kl penalty to reward
+                        if not self.config.algorithm.use_kl_loss and self.use_reference_policy:  # apply kl penalty to reward
                             batch, kl_metrics = apply_kl_penalty(
                                 batch, kl_ctrl=self.kl_ctrl, kl_penalty=self.config.algorithm.kl_penalty
                             )
