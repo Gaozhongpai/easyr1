@@ -341,12 +341,14 @@ class DataProto:
         """
         # TODO (zhangchi.usc1992) whether to copy
         if batch_keys is not None:
-            batch_keys = tuple(batch_keys)
+            batch_keys = tuple(filter(lambda k: k in self.batch, batch_keys))
             sub_batch = self.batch.select(*batch_keys)
         else:
             sub_batch = self.batch
 
         if non_tensor_batch_keys is not None:
+            # we must convert it to tuple to avoid the missing elements
+            non_tensor_batch_keys = tuple(filter(lambda k: k in self.non_tensor_batch, non_tensor_batch_keys))
             non_tensor_batch = {k: v for k, v in self.non_tensor_batch.items() if k in non_tensor_batch_keys}
         else:
             non_tensor_batch = self.non_tensor_batch
@@ -384,11 +386,11 @@ class DataProto:
         meta_info_keys = meta_info_keys or []
 
         tensors = {}
-        for key in batch_keys:
+        for key in filter(lambda k: k in self.batch, batch_keys):
             tensors[key] = self.batch.pop(key)
 
         non_tensors = {}
-        for key in non_tensor_batch_keys:
+        for key in filter(lambda k: k in self.non_tensor_batch, non_tensor_batch_keys):
             non_tensors[key] = self.non_tensor_batch.pop(key)
 
         meta_info = {}
