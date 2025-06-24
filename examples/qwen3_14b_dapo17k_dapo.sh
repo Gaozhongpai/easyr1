@@ -14,7 +14,7 @@ python3 -m verl.trainer.main \
     data.max_prompt_length=2048 \
     data.max_response_length=20480 \
     data.rollout_batch_size=512 \
-    data.mini_rollout_batch_size=1536 \
+    data.mini_rollout_batch_size=256 \
     worker.actor.micro_batch_size_per_device_for_update=1 \
     worker.actor.micro_batch_size_per_device_for_experience=8 \
     worker.actor.model.model_path=${MODEL_PATH} \
@@ -37,7 +37,7 @@ python3 -m verl.trainer.main \
     algorithm.filter_key=accuracy_normalized \
     algorithm.filter_low=0.01 \
     algorithm.filter_high=0.99 \
-    trainer.total_epochs=1 \
+    trainer.total_epochs=10 \
     trainer.max_try_make_batch=10 \
     trainer.experiment_name=qwen3_14b_dapo17k_dapo \
     trainer.n_gpus_per_node=8
