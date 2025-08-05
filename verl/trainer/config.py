@@ -141,6 +141,8 @@ class TrainerConfig:
     """save checkpoint path, if not specified, use `checkpoints/project_name/experiment_name`"""
     load_checkpoint_path: Optional[str] = None
     """load checkpoint path"""
+    ray_timeline: Optional[str] = None
+    """file to save ray timeline. set to None to disable"""
     find_last_checkpoint: bool = True
     """automatically find the last checkpoint in the save checkpoint path to resume training"""
 

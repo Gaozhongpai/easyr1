@@ -119,7 +119,9 @@ def main():
             }
         }
         ray.init(runtime_env=runtime_env)
-
+        if ppo_config.trainer.ray_timeline is not None:
+            ray.timeline(filename=ppo_config.trainer.ray_timeline)
+            
     runner = Runner.remote()
     ray.get(runner.run.remote(ppo_config))
 
