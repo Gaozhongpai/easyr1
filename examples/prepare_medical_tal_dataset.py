@@ -410,12 +410,23 @@ def main() -> None:
     _write_jsonl(output_dir / "train.jsonl", train_examples)
     _write_jsonl(output_dir / "validation.jsonl", eval_examples)
 
+    validation_small = eval_examples[: min(50, len(eval_examples))]
+    if validation_small:
+        _write_jsonl(output_dir / "validation_small.jsonl", validation_small)
+
     manifest = {
         "train_file": str((output_dir / "train.jsonl").resolve()),
         "validation_file": str((output_dir / "validation.jsonl").resolve()),
         "num_train_examples": len(train_examples),
         "num_validation_examples": len(eval_examples),
     }
+    if validation_small:
+        manifest.update(
+            {
+                "validation_small_file": str((output_dir / "validation_small.jsonl").resolve()),
+                "num_validation_small_examples": len(validation_small),
+            }
+        )
     with (output_dir / "manifest.json").open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2)
 

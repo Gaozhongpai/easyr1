@@ -11,12 +11,12 @@ DATA_DIR=/root/code/medical_tal_rlhf  # directory containing train.jsonl / valid
 python3 -m verl.trainer.main \
     config=examples/config.yaml \
     data.train_files=${DATA_DIR}/train.jsonl \
-    data.val_files=${DATA_DIR}/validation.jsonl \
+    data.val_files=${DATA_DIR}/validation_small.jsonl \
     data.max_prompt_length=8192 \
     data.max_response_length=512 \
     data.rollout_batch_size=32 \
     data.mini_rollout_batch_size=16 \
-    data.val_batch_size=-1 \
+    data.val_batch_size=2 \
     data.min_pixels=$((8 * 28 * 28)) \
     data.max_pixels=$((48 * 28 * 28)) \
     data.video_fps=2.0 \
