@@ -46,7 +46,12 @@ def collate_fn(features: list[dict[str, Any]]) -> dict[str, Any]:
         tensors[key] = torch.stack(value, dim=0)
 
     for key, value in non_tensors.items():
-        non_tensors[key] = np.array(value, dtype=object)
+        # Ensure we always keep a 1D object array so downstream concatenation only
+        # needs to reason about the batch dimension, even when every element shares
+        # the same inner shape (e.g. lists of equal length).
+        array = np.empty(len(value), dtype=object)
+        array[:] = value
+        non_tensors[key] = array
 
     return {**tensors, **non_tensors}
 
