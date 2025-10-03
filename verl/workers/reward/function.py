@@ -23,11 +23,13 @@ from typing import Callable, Optional, Tuple, TypedDict
 import torch
 from transformers import PreTrainedTokenizer
 
+import numpy as np
+
 from ...protocol import DataProto
 from .config import RewardConfig
 
 
-class RewardInput(TypedDict):
+class RewardInput(TypedDict, total=False):
     response: str
     response_length: int
     ground_truth: str
@@ -91,13 +93,16 @@ class SequentialFunctionRewardManager(FunctionRewardManager):
             response_str = self.tokenizer.decode(
                 valid_response_ids, skip_special_tokens=self.config.skip_special_tokens
             )
-            score = self.reward_fn(
-                {
-                    "response": response_str,
-                    "response_length": cur_response_length,
-                    "ground_truth": data.non_tensor_batch["ground_truth"][i],
-                }
-            )
+            reward_input: RewardInput = {
+                "response": response_str,
+                "response_length": cur_response_length,
+                "ground_truth": _extract_sample_value(data.non_tensor_batch["ground_truth"], i),
+            }
+            for key, values in data.non_tensor_batch.items():
+                if key == "ground_truth":
+                    continue
+                reward_input[key] = _extract_sample_value(values, i)
+            score = self.reward_fn(reward_input)
             reward_tensor[i, cur_response_length - 1] = score["overall"]
             for key, value in score.items():
                 reward_metrics[key].append(value)
@@ -118,13 +123,16 @@ class BatchFunctionRewardManager(FunctionRewardManager):
             response_str = self.tokenizer.decode(
                 valid_response_ids, skip_special_tokens=self.config.skip_special_tokens
             )
-            reward_inputs.append(
-                {
-                    "response": response_str,
-                    "response_length": cur_response_length,
-                    "ground_truth": data.non_tensor_batch["ground_truth"][i],
-                }
-            )
+            reward_input: RewardInput = {
+                "response": response_str,
+                "response_length": cur_response_length,
+                "ground_truth": _extract_sample_value(data.non_tensor_batch["ground_truth"], i),
+            }
+            for key, values in data.non_tensor_batch.items():
+                if key == "ground_truth":
+                    continue
+                reward_input[key] = _extract_sample_value(values, i)
+            reward_inputs.append(reward_input)
 
         scores = self.reward_fn(reward_inputs)
         reward_tensor = torch.zeros_like(data.batch["responses"], dtype=torch.float32)
@@ -136,3 +144,15 @@ class BatchFunctionRewardManager(FunctionRewardManager):
                 reward_metrics[key].append(value)
 
         return reward_tensor, reward_metrics
+def _extract_sample_value(container, index: int):
+    value = container[index]
+    if isinstance(value, torch.Tensor):
+        value = value.detach().cpu()
+        if value.ndim == 0:
+            return value.item()
+        return value.tolist()
+    if isinstance(value, np.ndarray):
+        if value.ndim == 0:
+            return value.item()
+        return value.tolist()
+    return value
