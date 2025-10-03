@@ -25,14 +25,14 @@ python3 -m verl.trainer.main \
     worker.actor.micro_batch_size_per_device_for_update=2 \
     worker.actor.micro_batch_size_per_device_for_experience=4 \
     worker.actor.ppo_epochs=1 \
-    worker.rollout.n=4 \
+    worker.rollout.n=2 \
     worker.rollout.tensor_parallel_size=1 \
-    worker.rollout.enable_chunked_prefill=false \
+    worker.rollout.enable_chunked_prefill=true \
     worker.rollout.max_num_batched_tokens=12288 \
     worker.reward.reward_type=batch \
     worker.reward.reward_function=./examples/reward_function/medical_tal.py:compute_score \
     trainer.experiment_name=qwen2_5_vl_7b_medical_grpo \
-    trainer.n_gpus_per_node=2 \
+    trainer.n_gpus_per_node=8 \
     trainer.val_generations_to_log=6 \
     trainer.save_freq=50 \
     trainer.val_before_train=false
