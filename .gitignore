@@ -182,3 +182,6 @@ tensorboard_log/
 # data
 images/
 images*
+medical_tal_rlhf/
+medical_tal_rlhf/
+medical_tal_rlhf_v2/
